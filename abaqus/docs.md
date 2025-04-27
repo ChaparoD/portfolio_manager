@@ -12,7 +12,7 @@ Daniel chaparro
 ```python -m venv venv```
 2. Activar ambiente virtual.
 ```.\venv\Scripts\activate```
-2. Instalar Django.
+2. Instalar depencias.
 ```python -m pip install Django```
 
 #### MacOS
@@ -26,9 +26,10 @@ Daniel chaparro
 
 #### Runserver 
 4. ``` (venv) $ cd portafolio```
-5. ``` (venv) $ python manage.py migrate```
-6. ``` (venv) $ python manage.py runserver```
-7. ``` (venv) $ python manage.py run_etl```
+5. ``` (venv) $ pip install requirements.txt```
+6. ``` (venv) $ python manage.py migrate```
+7. ``` (venv) $ python manage.py runserver```
+8. ``` (venv) $ python manage.py run_etl```
 
 
 Super User Credentials:
