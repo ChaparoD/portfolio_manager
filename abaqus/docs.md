@@ -26,7 +26,7 @@ Daniel chaparro
 
 #### Runserver 
 4. ``` (venv) $ cd portafolio```
-5. ``` (venv) $ pip install requirements.txt```
+5. ``` (venv) $ pip install -r requirements.txt```
 6. ``` (venv) $ python manage.py migrate```
 7. ``` (venv) $ python manage.py runserver```
 8. ``` (venv) $ python manage.py run_etl```
