@@ -7,8 +7,23 @@ from rest_framework import permissions, viewsets
 from .serializers import GroupSerializer, UserSerializer, AssetWeightSerializer
 from datetime import datetime
 from django.db.models import Sum
+import requests
 
 
+
+""" HTML Redirections"""
+def portfolio_time_series(request):
+    # URL del endpoint
+    
+    return render(request, 'assets/portfolios.html')
+
+
+def asset_weights(request):
+    return render(request, 'assets/assetsWeights.html')
+
+
+
+""" REST framework views"""
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
@@ -27,10 +42,6 @@ class GroupViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
 
-def home(request):
-
-    return render(request, "assets/home.html", {})
-
 
 class AssetWeightViewSet(viewsets.ModelViewSet):
     """
@@ -40,6 +51,8 @@ class AssetWeightViewSet(viewsets.ModelViewSet):
     serializer_class = AssetWeightSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+
+""" Helpers"""
 def get_porfolio_values(asset_values):
     response_data = []
     portfolio_values = asset_values.values('date', 
@@ -62,6 +75,7 @@ def get_porfolio_values(asset_values):
     return response_data
 
 
+""" Assets Weights endpoint """
 class AssetWeight(View):
         
     def get(self, request):
@@ -103,11 +117,11 @@ class AssetWeight(View):
                 "asset_name": asset["asset__name"],
                 "portfolio_name": asset["asset__portfolio__name"],
                 "weights": [{"date": value['date'].strftime('%Y-%m-%d'),
-                            "weight": (value['asset_value']/
+                            "weight": round(value['asset_value']/
                                          portfolio_values.filter(asset__portfolio__id = portfolio_id,
                                                                   date= value['date'])\
                                          .values('portfolio_daily_value')[0]['portfolio_daily_value']
-                                         ) } for value in values]
+                                         ,ndigits=3) } for value in values]
             }
             response_data["assets"].append(asset_data)
 
@@ -115,6 +129,7 @@ class AssetWeight(View):
 
 
 
+""" Portfolio values endpoint"""
 class PortfolioValues(View):
 
     def get(self, request):
@@ -147,4 +162,11 @@ class PortfolioValues(View):
         response_data["portfolios"] = get_porfolio_values(asset_values)
 
         return JsonResponse(response_data)
+
+
+class PortfolioOptions(View):
+    def get(self, request):
+        portfolio_names = list(Portfolio.objects.all().values_list('name', flat=True))
+        return JsonResponse({'portfolios': portfolio_names}, safe=False)
+
 

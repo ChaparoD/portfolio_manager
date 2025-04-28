@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Portfolio Values Graph</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <form id="dateForm">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" name="startDate" required>
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" name="endDate" required>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="graph"></div>
+    <script>
+        document.getElementById('dateForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const url = `http://127.0.0.1:8000/portfolio/?fecha_inicio=${startDate}&fecha_fin=${endDate}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const portfolios = data.portfolios;
+                    const graphData = [];
+
+                    portfolios.forEach(portfolio => {
+                        const trace = {
+                            x: portfolio.total_values.map(item => item.date),
+                            y: portfolio.total_values.map(item => item.value),
+                            name: portfolio.portfolio_name,
+                            type: 'scatter',
+                            mode: 'lines'
+                        };
+                        graphData.push(trace);
+                    });
+
+                    Plotly.newPlot('graph', graphData);
+                });
+        });
+    </script>
+</body>
+</html>

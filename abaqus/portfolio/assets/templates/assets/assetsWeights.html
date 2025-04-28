@@ -1,0 +1,91 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Asset Weights Graph</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <form id="dateForm">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" name="startDate" required>
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" name="endDate" required>
+        <label for="portfolio">Portfolio:</label>
+        <select id="portfolio" name="portfolio" required>
+            <!-- Options will be dynamically populated -->
+        </select>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="loading" style="display:none;">Loading...</div>
+    <div id="graph"></div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const url = 'http://127.0.0.1:8000/portfolio_options';
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Fetched portfolio options:', data); // Debugging line
+                    const portfolioSelect = document.getElementById('portfolio');
+                    data.portfolios.forEach(portfolio => {
+                        const option = document.createElement('option');
+                        option.value = portfolio;
+                        option.textContent = portfolio;
+                        portfolioSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching portfolio options:', error));
+        });
+
+        document.getElementById('dateForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            document.getElementById('loading').style.display = 'block'; // Show loading indicator
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const selectedPortfolio = document.getElementById('portfolio').value;
+
+            fetch('http://127.0.0.1:8000/weights/?fecha_inicio=' + startDate + '&fecha_fin=' + endDate)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none'; // Hide loading indicator
+                    console.log('Fetched weights data:', data); // Debugging line
+                    const assets = data.assets.filter(asset => asset.portfolio_name === selectedPortfolio);
+                    console.log('Filtered assets:', assets); // Debugging line
+                    const graphData = [];
+
+                    assets.forEach(asset => {
+                        const trace = {
+                            x: asset.weights.map(weight => weight.date),
+                            y: asset.weights.map(weight => weight.weight),
+                            name: asset.asset_name,
+                            type: 'scatter',
+                            mode: 'lines',
+                            stackgroup: 'one'
+                        };
+                        graphData.push(trace);
+                    });
+
+                    console.log('Graph data:', graphData); // Debugging line
+
+                    const layout = {
+                        title: 'Asset Weights Over Time',
+                        yaxis: {
+                            title: 'Weight (%)',
+                            range: [0, 1]
+                        },
+                        xaxis: {
+                            title: 'Date'
+                        }
+                    };
+
+                    Plotly.newPlot('graph', graphData, layout);
+                })
+                .catch(error => {
+                    document.getElementById('loading').style.display = 'none'; // Hide loading indicator
+                    console.error('Error fetching weights:', error);
+                });
+        });
+    </script>
+</body>
+</html>

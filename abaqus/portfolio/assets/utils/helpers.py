@@ -30,7 +30,7 @@ def extract_instances():
                         with transaction.atomic():
                             new_asset = Asset.objects.create(name = assets[0], 
                                                 portfolio=new_portfolio, 
-                                                initial_weight = assets[1])
+                                                initial_weight = round(assets[1], 3) )
                             new_asset.save()
 
                     except Exception as e:
@@ -47,7 +47,7 @@ def calculate_quantity(df :pl.DataFrame):
         for instance in query_set:
             
             qty = (instance.initial_weight * instance.portfolio.initial_value)/df[asset_name][0]
-            instance.update_quantity(qty)
+            instance.update_quantity(round(qty, 3))
 
 
 def load_raw_prices():
@@ -62,7 +62,7 @@ def load_raw_prices():
             bulk_data.append(RawDailyPrices(
                                 date=value[0],
                                 asset_name=assets_names[asset],
-                                price=value[asset] ))
+                                price=round(value[asset], 3) ))
             
 
     try:
@@ -90,7 +90,7 @@ def transform_prices():
                                 date= price.date,
                                 asset= asset,
                                 price= price.price,
-                                asset_value = price.price * asset.quantity ))
+                                asset_value = round(price.price * asset.quantity, 3) ))
     try:
         with transaction.atomic():
             FactsDailyPrices.objects.bulk_create(bulk_facts)
