@@ -1,2 +1,11 @@
 .db_sqlite3
 .DS_Store
+.env
+.venv
+env/
+venv/
+*.log
+*.pot
+*.pyc
+_pycache_/
+local_settings.py
