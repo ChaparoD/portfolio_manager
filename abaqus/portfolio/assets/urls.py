@@ -2,14 +2,13 @@ from django.urls import path, include
 from assets import views
 from .views import AssetWeight, PortfolioValues, PortfolioOptions
 from rest_framework import routers
-from .views import UserViewSet, GroupViewSet, AssetWeightViewSet
+from .views import UserViewSet, AssetWeightViewSet
 
 
 
 # Routers provide an easy way of automatically determining the URL conf.
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
-router.register(r'groups',GroupViewSet)
 router.register(r'facts',AssetWeightViewSet)
 
 

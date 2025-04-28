@@ -17,7 +17,6 @@
         <input type="date" id="endDate" name="endDate" required>
         <label for="portfolio">Portfolio:</label>
         <select id="portfolio" name="portfolio" required>
-            <!-- Options will be dynamically populated -->
         </select>
         <button type="submit">Submit</button>
     </form>
@@ -29,7 +28,6 @@
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Fetched portfolio options:', data); // Debugging line
                     const portfolioSelect = document.getElementById('portfolio');
                     data.portfolios.forEach(portfolio => {
                         const option = document.createElement('option');
@@ -43,7 +41,7 @@
 
         document.getElementById('dateForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            document.getElementById('loading').style.display = 'block'; // Show loading indicator
+            document.getElementById('loading').style.display = 'block';
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
             const selectedPortfolio = document.getElementById('portfolio').value;
@@ -51,10 +49,8 @@
             fetch('http://127.0.0.1:8000/weights/?fecha_inicio=' + startDate + '&fecha_fin=' + endDate)
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('loading').style.display = 'none'; // Hide loading indicator
-                    console.log('Fetched weights data:', data); // Debugging line
+                    document.getElementById('loading').style.display = 'none'; 
                     const assets = data.assets.filter(asset => asset.portfolio_name === selectedPortfolio);
-                    console.log('Filtered assets:', assets); // Debugging line
                     const graphData = [];
 
                     assets.forEach(asset => {
@@ -68,8 +64,6 @@
                         };
                         graphData.push(trace);
                     });
-
-                    console.log('Graph data:', graphData); // Debugging line
 
                     const layout = {
                         title: 'Asset Weights Over Time',
@@ -85,7 +79,7 @@
                     Plotly.newPlot('graph', graphData, layout);
                 })
                 .catch(error => {
-                    document.getElementById('loading').style.display = 'none'; // Hide loading indicator
+                    document.getElementById('loading').style.display = 'none'; 
                     console.error('Error fetching weights:', error);
                 });
         });

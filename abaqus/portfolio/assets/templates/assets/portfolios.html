@@ -40,8 +40,12 @@
                         };
                         graphData.push(trace);
                     });
+                    const layout = {
+                        title: 'Portfolio Values Over Time',
+                        
+                    };
 
-                    Plotly.newPlot('graph', graphData);
+                    Plotly.newPlot('graph', graphData, layout);
                 });
         });
     </script>

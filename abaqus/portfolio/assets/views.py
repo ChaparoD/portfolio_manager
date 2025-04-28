@@ -8,6 +8,7 @@ from .serializers import GroupSerializer, UserSerializer, AssetWeightSerializer
 from datetime import datetime
 from django.db.models import Sum
 import requests
+from collections import defaultdict
 
 
 
@@ -21,35 +22,6 @@ def portfolio_time_series(request):
 def asset_weights(request):
     return render(request, 'assets/assetsWeights.html')
 
-
-
-""" REST framework views"""
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
-    queryset = User.objects.all().order_by('-date_joined')
-    serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class GroupViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = Group.objects.all().order_by('name')
-    serializer_class = GroupSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-
-class AssetWeightViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows groups to be viewed or edited.
-    """
-    queryset = FactsDailyPrices.objects.all().select_related('asset').order_by('date')
-    serializer_class = AssetWeightSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
 
 """ Helpers"""
@@ -73,6 +45,28 @@ def get_porfolio_values(asset_values):
         response_data.append(portfolio_data)
 
     return response_data
+
+def get_portfolio_daily_value(values ,portfolio_id, date):
+            return values[portfolio_id].get(date, None)
+
+""" REST framework views"""
+class UserViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows users to be viewed or edited.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+class AssetWeightViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows groups to be viewed or edited.
+    """
+    queryset = FactsDailyPrices.objects.all().select_related('asset').order_by('date')
+    serializer_class = AssetWeightSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
 
 
 """ Assets Weights endpoint """
@@ -98,8 +92,19 @@ class AssetWeight(View):
                                             'asset__portfolio__id','asset__portfolio__name')
         
         portfolio_values = asset_values.values('date', 'asset__portfolio__id')\
-                                .annotate(portfolio_daily_value=Sum('asset_value'))
-        
+                                .annotate(portfolio_daily_value=Sum('asset_value'))\
+                                .values_list('asset__portfolio__id', 
+                                             'date', 
+                                             'portfolio_daily_value')
+
+        # Almacenamos valores de portafolios en memoria para optimizar los llamados en el cálculo de "weight"
+        portfolio_dict_values = {}  # {"portfolio_id" : {"date" : "value"}}
+        for item in portfolio_values:
+            portfolio_id = item[0]
+            if portfolio_id not in portfolio_dict_values:
+                portfolio_dict_values[portfolio_id] = {}
+            portfolio_dict_values[portfolio_id][item[1].strftime('%Y-%m-%d')] = item[2]
+       
         response_data = {
             "fecha_inicio": start_date.strftime('%Y-%m-%d'),
             "fecha_fin": end_date.strftime('%Y-%m-%d'),
@@ -118,10 +123,9 @@ class AssetWeight(View):
                 "portfolio_name": asset["asset__portfolio__name"],
                 "weights": [{"date": value['date'].strftime('%Y-%m-%d'),
                             "weight": round(value['asset_value']/
-                                         portfolio_values.filter(asset__portfolio__id = portfolio_id,
-                                                                  date= value['date'])\
-                                         .values('portfolio_daily_value')[0]['portfolio_daily_value']
-                                         ,ndigits=3) } for value in values]
+                                portfolio_dict_values[portfolio_id][value['date'].strftime('%Y-%m-%d')]
+                                            , ndigits=3)
+                            } for value in values]
             }
             response_data["assets"].append(asset_data)
 
