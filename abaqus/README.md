@@ -123,9 +123,9 @@ http://127.0.0.1:8000/transactions/
 
 ### Modelo de datos
 
-![alt text](./img/facts_model.png "Facts")
-![alt text](./img/dim_asset_portfolio.png "Asset Dimension")
-![alt text](./img/db_tables_extraction.png "DW")
+![alt text](./portfolio/assets/data/img/facts_model.png "Facts")
+![alt text](./portfolio/assets/data/img/dim_asset_portfolio.png "Asset Dimension")
+![alt text](./portfolio/assets/data/img/db_tables_extraction.png "DW")
 
 
 ## SQL
@@ -188,7 +188,8 @@ ON
 ### Deuda técnica
 - Manejar códigos HTTP de responses entre llamados de vistas, para todos los flujos.
 - Styling a vistas de gráficos.
-- Redirección luego de transacciones al gráfico de linea con los filtros pre definidos con el fin de identificar la variación del valor del portfolio.
+- Redirección luego de transacciones al gráfico de linea con los filtros pre definidos con la fecha de transacción dentro, para identificar la variación del valor del portfolio.
+
 
 
 ## Referencias

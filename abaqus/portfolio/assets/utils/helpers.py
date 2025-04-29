@@ -76,11 +76,12 @@ def load_raw_prices():
     
 def transform_prices():
     """
-    Dimensional fact model will have, as many duplicated raw rows
-    exists for each portfolio instance.
-    So, for every Asset Price, if the Asset has presence in 3  Portfolios, then 3 rows will 
-    be added, with their corresponding weight.
-    NOTE : SQL precise views of could be constructed to ease the access for non SQL experts.
+    Modelo dimensional de hechos:
+    - Se agregará cada registro de Raw (tiempo/activo/precio) por cuantas "Instancias" 
+        encuentre de ese activo particular en los portfolios.
+        Ej: Si todas las acciones están en ambos portafolios, se Facts tiene el doble de
+          registros que Raw. 
+    NOTE : Se pueden entregar vistas de consumo del modelo para usuarios no expertos en SQL.
     """
     print("Conforming facts ... ... ..")
     raw_prices = RawDailyPrices.objects.all()
@@ -151,6 +152,7 @@ def update_facts_assets_values(min_date, transactions):
             obs:
             - Falta cubrir casos de si el activo no existe para el portafolio.
             - No hay validaciones de venta por sobre lo disponible. Solo se lleva cantidad y valor a 0
+            - No existen agrupaciones bajo transacciones sobre el mismo activo.
             """
             asset = assets.get(name = mov["asset"], portfolio__name = mov["portfolio"] )
             if asset:
