@@ -44,8 +44,7 @@ No se configuró un puerto particular, si no que se utilizó el por defecto de d
 -   "http://127.0.0.1:8000/" = Django rest Api Root framework.
 -   "http://127.0.0.1:8000/facts/" = Facts serializer view.
 -   "http://127.0.0.1:8000/admin/" = Django Admin.
--   "http://127.0.0.1:8000/portfolio/?fecha_inicio=2023-02-12&fecha_fin=2023-02-12" = Get Portfolio values against "fecha_inicio" & "fecha_fin".
--   "http://127.0.0.1:8000/weights/?fecha_inicio=2023-02-12&fecha_fin=2023-02-12" = Asset weights for each date and portfolio.
+
 
 ### Ejemplos de acceso:
 
