@@ -67,7 +67,7 @@ Gráfico "Lineal" para comportamiento del valor total dentro de un portafolio en
 ```
    http://127.0.0.1:8000/portfolio_time_series
 ``` 
-Gráfico "Stacked Area" para "weights" de activos dentro de un portafolio en el tiempo.
+Gráfico "Stacked Area" para "weights" o bien participación (%) de activos dentro de un portafolio en el tiempo.
 ```
    http://127.0.0.1:8000/asset_weights
 ``` 
