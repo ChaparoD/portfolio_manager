@@ -1,5 +1,6 @@
 *.db_sqlite3
 *.DS_Store
+..DS_Store
 *.env
 *.venv
 env/
