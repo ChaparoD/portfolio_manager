@@ -71,7 +71,16 @@ Gráfico "Stacked Area" para "weights" de activos dentro de un portafolio en el 
 ```
    http://127.0.0.1:8000/asset_weights
 ``` 
-
+### Bonus 2
+- Herramienta de compra y venta de acciones. 
+Al gatillar el submit para las acciones recopiladas.
+1. Se guardará un snapshot de facts anteriores, con el fin de otorgar la posibilida de analizar "Escenarios" a futuro.
+2. Se guardarán las transacciones.
+3. Se actualizarán las cantidades asociadas a los activos.
+4. Se actualizará todos los respectivos valores de "asset_value" pertenecientes a facts, los cuales esten asociados a las fechas desde la compra, para los activos y portafolios involucrados.
+```
+http://127.0.0.1:8000/transactions/
+```
 ## Data Warehouse : Documentación
 - Visitar portfolio/assets/models.py
 
@@ -99,11 +108,25 @@ Gráfico "Stacked Area" para "weights" de activos dentro de un portafolio en el 
     - asset_name
     - price
     - asset_value
+#### Facts Daily Prices Snapshot
+    - date
+    - asset_name
+    - price
+    - asset_value
+    - snapshot_date
+#### Transactions
+    - date
+    - action
+    - amount
+    - asset
+    - portfolio
 
 ### Modelo de datos
 
-![alt text](./img/facts_model.png "Title")
-![alt text](./img/dim_asset_portfolio.png "Title")
+![alt text](./img/facts_model.png "Facts")
+![alt text](./img/dim_asset_portfolio.png "Asset Dimension")
+![alt text](./img/db_tables_extraction.png "DW")
+
 
 ## SQL
 
@@ -160,6 +183,12 @@ ON
 - Se aproximaron los valores obtenidos al tercer decimal.
 - Se construyó una tabla facts, simulando el proceso de obtención de precios de activos por portafolio.
 - Para Optimizar el proceso de obtención de "weights", se sugiere construir una vista particular, como la segunda query entregada en la parte superior, mediante una migración y el comando RunSQL, para la construcción de la variable "Weights" dependiente de Facts.  Sustituyendo parcialmente el uso del ORM para este caso particular. Y manteniendo actualizados los "weights" frente a cambios en Facts.
+- Se guardaron snapshots de tablas de valores para cada conjunto de compras o ventas realizadas, con el fin de, a futuro, poder realizar comparaciones entre escenarios.
+
+### Deuda técnica
+- Manejar entre códigos de responses entre llamados de vistas, para todos los flujos.
+- Styling a vistas de gráficos.
+
 
 ## Referencias
 - https://realpython.com/get-started-with-django-1/

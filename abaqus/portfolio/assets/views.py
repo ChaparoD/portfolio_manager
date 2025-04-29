@@ -1,12 +1,14 @@
 from django.shortcuts import render
-from .models import FactsDailyPrices, Asset, Portfolio
+from .models import FactsDailyPrices, Asset, Portfolio 
+from .utils.helpers import take_facts_snapshot, save_transactions, update_facts_assets_values
 from django.views import View
 from django.http import  JsonResponse
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import  User
 from rest_framework import permissions, viewsets
 from .serializers import  UserSerializer, AssetWeightSerializer
 from datetime import datetime
 from django.db.models import Sum
+import json
 
 
 
@@ -23,10 +25,13 @@ def asset_weights(request):
 """Recieve 1 or more Transactions"""
 def transaction_view(request):
     if request.method == 'POST':
-        transactions = request.POST.getlist('transactions')
+        transactions = json.loads(request.body).get('transactions', [])
+        print(transactions)
+        update_facts_table(transactions)
         print("llego post")
         return JsonResponse({'status': 'success', 'transactions': transactions})
     return render(request, 'assets/transaction_form.html')
+
 
 
 """ Helpers"""
@@ -189,3 +194,11 @@ class AssetOptions(View):
     #CRUD se completa aquí.
 
 
+def update_facts_table(transactions):
+    
+    date = transactions[0]["date"]
+    print(date)
+    take_facts_snapshot(date)
+    save_transactions(date, transactions)
+    update_facts_assets_values(date, transactions)
+    

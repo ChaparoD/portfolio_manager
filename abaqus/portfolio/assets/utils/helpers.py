@@ -1,5 +1,7 @@
 from django.db import transaction
-from ..models import Portfolio, Asset, RawDailyPrices, FactsDailyPrices
+from django.db.models import F
+from ..models import Portfolio, Asset, RawDailyPrices, FactsDailyPrices,\
+                     FactsDailyPricesSnapshot, AssetTransactions
 import polars as pl
 import os, datetime
 
@@ -95,5 +97,74 @@ def transform_prices():
         with transaction.atomic():
             FactsDailyPrices.objects.bulk_create(bulk_facts)
     except Exception as e:
-        print(f'RaisedException during asset prices bulk operation :  {e} ')
+        print(f'RaisedException during asset prices facts bulk operation :  {e} ')
     
+
+def take_facts_snapshot(date):
+    print("Snapshoting facts ... ... ..")
+    snapshot = FactsDailyPrices.objects.all()
+    bulk_facts_snapshot = []
+    for facts in snapshot.iterator():
+        bulk_facts_snapshot.append(FactsDailyPricesSnapshot(
+                            date= facts.date,
+                            asset= facts.asset,
+                            price= facts.price,
+                            asset_value = facts.asset_value,
+                            snapshot_date= date))
+    try:
+        with transaction.atomic():
+            FactsDailyPricesSnapshot.objects.bulk_create(bulk_facts_snapshot)
+    except Exception as e:
+        print(f'RaisedException during snapshot fact asset prices bulk operation :  {e} ')
+    
+def save_transactions(date, transactions):
+    print("Saving transactions ... ... ..")
+    bulk_transactions = []
+    for data in transactions:
+        bulk_transactions.append(AssetTransactions(
+                            date = date,
+                            action = data['action'],
+                            amount = data['amount'],
+                            asset = data['asset'],
+                            portfolio = data['portfolio']
+                            ))
+    try:
+        with transaction.atomic():
+            AssetTransactions.objects.bulk_create(bulk_transactions)
+    except Exception as e:
+        print(f'RaisedException during transactions bulk operation :  {e} ')
+    pass
+
+"""
+[{'date': '2025-04-02', 'action': 'Buy', 'amount': '20000', 'portfolio': 'portafolio 1', 'asset': 'Europa'},
+ {'date': '2025-04-02', 'action': 'Buy', 'amount': '234512451', 'portfolio': 'portafolio 1', 'asset': 'ABS'}]
+"""
+def update_facts_assets_values(min_date, transactions):
+    facts_domain = FactsDailyPrices.objects.filter(date=min_date)
+    if not facts_domain:
+        print("No facts to update")
+        return
+    else:
+        assets = Asset.objects.all().select_related('portfolio')
+        for mov in transactions:
+            """
+            Para cada transacción, si existe el activo relacionado, calcula la nueva cantidad
+            obs:
+            - Falta cubrir casos de si el activo no existe para el portafolio
+            - No hay validaciones de venta por sobre lo disponible
+            """
+            asset = assets.get(name = mov["asset"], portfolio__name = mov["portfolio"] )
+            if asset:
+                asset_transaction_price = facts_domain.filter(date=min_date, asset = asset).values('price')
+                if asset["action"] == "Sell":
+                    asset.quantity = max(0, asset.quantity - float(mov["amount"]) / 
+                                         asset_transaction_price[0]['price'])
+                else:
+                    asset.quantity += float(mov["amount"])/asset_transaction_price[0]['price'] 
+                
+                asset.save()
+                facts_domain.filter(asset=asset).update(asset_value = F('price') *asset.quantity )
+
+
+
+        
