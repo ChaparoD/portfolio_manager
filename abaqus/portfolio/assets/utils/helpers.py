@@ -133,13 +133,10 @@ def save_transactions(date, transactions):
             AssetTransactions.objects.bulk_create(bulk_transactions)
     except Exception as e:
         print(f'RaisedException during transactions bulk operation :  {e} ')
-    pass
+    
 
-"""
-[{'date': '2025-04-02', 'action': 'Buy', 'amount': '20000', 'portfolio': 'portafolio 1', 'asset': 'Europa'},
- {'date': '2025-04-02', 'action': 'Buy', 'amount': '234512451', 'portfolio': 'portafolio 1', 'asset': 'ABS'}]
-"""
 def update_facts_assets_values(min_date, transactions):
+    print("Updating Facts ... ... ..")
     facts_domain = FactsDailyPrices.objects.filter(date=min_date)
     if not facts_domain:
         print("No facts to update")
@@ -148,15 +145,16 @@ def update_facts_assets_values(min_date, transactions):
         assets = Asset.objects.all().select_related('portfolio')
         for mov in transactions:
             """
-            Para cada transacción, si existe el activo relacionado, calcula la nueva cantidad
+            Para cada transacción, si existe el activo relacionado, calcula la nueva cantidad, valor
+            asociado
             obs:
-            - Falta cubrir casos de si el activo no existe para el portafolio
-            - No hay validaciones de venta por sobre lo disponible
+            - Falta cubrir casos de si el activo no existe para el portafolio.
+            - No hay validaciones de venta por sobre lo disponible. Solo se lleva cantidad y valor a 0
             """
             asset = assets.get(name = mov["asset"], portfolio__name = mov["portfolio"] )
             if asset:
                 asset_transaction_price = facts_domain.filter(date=min_date, asset = asset).values('price')
-                if asset["action"] == "Sell":
+                if mov["action"] == "Sell":
                     asset.quantity = max(0, asset.quantity - float(mov["amount"]) / 
                                          asset_transaction_price[0]['price'])
                 else:
