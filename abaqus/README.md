@@ -16,18 +16,14 @@
 ```.\venv\Scripts\activate```
 - MacOS
 ```source ./venv/bin/activate```
-3. Instalar depencias.
-```python -m pip install Django```
-
-
 
 
 #### Levantar aplicación. 
-4.  (venv) $ Entrar al proyecto Django : ```cd portfolio```
-5.  (venv) $ Instalar depencias del proyecto: ```pip install -r requirements.txt```
-6.  (venv) $ Construir BBDD y correr migraciones: ```python manage.py migrate```
-7.  (venv) $ Levantar servidor: ```python manage.py runserver```
-8.  (venv) $ Poblar BBDD: ```python manage.py run_etl```
+3.  (venv) $ Entrar al proyecto Django : ```cd portfolio```
+4.  (venv) $ Instalar depencias del proyecto: ```pip install -r requirements.txt```
+5.  (venv) $ Construir BBDD y correr migraciones: ```python manage.py migrate```
+6.  (venv) $ Levantar servidor: ```python manage.py runserver```
+7.  (venv) $ Poblar BBDD: ```python manage.py run_etl```
 
 
 #### Credenciales de super usuario.
