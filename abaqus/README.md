@@ -82,39 +82,39 @@ Al gatillar el submit para las acciones recopiladas:
 http://127.0.0.1:8000/transactions/
 ```
 ## Data Warehouse : Documentación
-- Visitar portfolio/assets/models.py
+Visitar portfolio/assets/models.py
 
 ### Dimensiones
-#### dim_asset
+#### Asset  (_dim_asset_)
     - name
     - initial_weight
     - quantity
     - portfolio_id
 
 
-#### dim_portfolio
+#### Portfolio (_dim_portfolio_)
     - name
     - initial_value
 
 ### Tablas ETL 
 
-#### Raw Daily Prices
+#### Raw Daily Prices  (_raw_daily_prices_)
     - date
     - asset_id
     - price
     - asset_value
-#### Facts Daily Prices
+#### Facts Daily Prices (_fact_daily_prices_)
     - date
     - asset_name
     - price
     - asset_value
-#### Facts Daily Prices Snapshot
+#### Facts Daily Prices Snapshot (_fact_daily_prices_snapshot_)
     - date
     - asset_name
     - price
     - asset_value
     - snapshot_date
-#### Transactions
+#### Transactions (_raw_transactions_)
     - date
     - action
     - amount
@@ -189,6 +189,7 @@ ON
 - Manejar códigos HTTP de responses entre llamados de vistas, para todos los flujos.
 - Styling a vistas de gráficos.
 - Redirección luego de transacciones al gráfico de linea con los filtros pre definidos con la fecha de transacción dentro, para identificar la variación del valor del portfolio.
+- Refactorizar llamados a url hardcodeado con IP por defecto, por variable de ambiente.
 
 
 
