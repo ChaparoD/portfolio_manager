@@ -26,9 +26,7 @@ def asset_weights(request):
 def transaction_view(request):
     if request.method == 'POST':
         transactions = json.loads(request.body).get('transactions', [])
-        print(transactions)
         update_facts_table(transactions)
-        print("llego post")
         return JsonResponse({'status': 'success', 'transactions': transactions})
     return render(request, 'assets/transaction_form.html')
 
@@ -196,8 +194,8 @@ class AssetOptions(View):
 
 def update_facts_table(transactions):
     
-    date = transactions[0]["date"]
-    print(date)
+    date_str = transactions[0]["date"]
+    date = datetime.strptime(date_str, '%Y-%m-%d')
     take_facts_snapshot(date)
     save_transactions(date, transactions)
     update_facts_assets_values(date, transactions)

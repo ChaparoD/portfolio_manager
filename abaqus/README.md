@@ -72,9 +72,9 @@ Gráfico "Stacked Area" para "weights" de activos dentro de un portafolio en el 
    http://127.0.0.1:8000/asset_weights
 ``` 
 ### Bonus 2
-- Herramienta de compra y venta de acciones. 
-Al gatillar el submit para las acciones recopiladas.
-1. Se guardará un snapshot de facts anteriores, con el fin de otorgar la posibilida de analizar "Escenarios" a futuro.
+Herramienta de compra y venta de acciones. 
+Al gatillar el submit para las acciones recopiladas:
+1. Se guardará un snapshot de los valores de activos anteriores, con el fin de otorgar la posibilidad de analizar "Escenarios".
 2. Se guardarán las transacciones.
 3. Se actualizarán las cantidades asociadas a los activos.
 4. Se actualizará todos los respectivos valores de "asset_value" pertenecientes a facts, los cuales esten asociados a las fechas desde la compra, para los activos y portafolios involucrados.
@@ -186,8 +186,9 @@ ON
 - Se guardaron snapshots de tablas de valores para cada conjunto de compras o ventas realizadas, con el fin de, a futuro, poder realizar comparaciones entre escenarios.
 
 ### Deuda técnica
-- Manejar entre códigos de responses entre llamados de vistas, para todos los flujos.
+- Manejar códigos HTTP de responses entre llamados de vistas, para todos los flujos.
 - Styling a vistas de gráficos.
+- Redirección luego de transacciones al gráfico de linea con los filtros pre definidos con el fin de identificar la variación del valor del portfolio.
 
 
 ## Referencias

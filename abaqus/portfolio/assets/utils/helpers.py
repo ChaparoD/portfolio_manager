@@ -137,12 +137,13 @@ def save_transactions(date, transactions):
 
 def update_facts_assets_values(min_date, transactions):
     print("Updating Facts ... ... ..")
-    facts_domain = FactsDailyPrices.objects.filter(date=min_date)
+    facts_domain = FactsDailyPrices.objects.filter(date__gte=min_date)
     if not facts_domain:
         print("No facts to update")
         return
     else:
         assets = Asset.objects.all().select_related('portfolio')
+        print(transactions)
         for mov in transactions:
             """
             Para cada transacción, si existe el activo relacionado, calcula la nueva cantidad, valor
@@ -154,14 +155,17 @@ def update_facts_assets_values(min_date, transactions):
             asset = assets.get(name = mov["asset"], portfolio__name = mov["portfolio"] )
             if asset:
                 asset_transaction_price = facts_domain.filter(date=min_date, asset = asset).values('price')
-                if mov["action"] == "Sell":
-                    asset.quantity = max(0, asset.quantity - float(mov["amount"]) / 
-                                         asset_transaction_price[0]['price'])
-                else:
-                    asset.quantity += float(mov["amount"])/asset_transaction_price[0]['price'] 
-                
-                asset.save()
-                facts_domain.filter(asset=asset).update(asset_value = F('price') *asset.quantity )
+                if asset_transaction_price:
+                    if mov["action"] == "Sell":
+                        asset.quantity = round(max(0, asset.quantity - float(mov["amount"]) / 
+                                            asset_transaction_price[0]['price']), 3)
+                    else:
+                        asset.quantity += round(float(mov["amount"])/asset_transaction_price[0]['price'], 3) 
+                    
+                    asset.save()
+                    facts_domain.filter(asset=asset).update(asset_value = 
+                                                         F('price') * asset.quantity) 
+                    
 
 
 
