@@ -10,15 +10,17 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
+    <h1> Participación (%) de activos de un Portafolio</h1>
+    <br>
     <form id="dateForm">
-        <label for="startDate">Start Date:</label>
+        <label for="startDate"> Fecha inicio:</label>
         <input type="date" id="startDate" name="startDate" required>
         <label for="endDate">End Date:</label>
         <input type="date" id="endDate" name="endDate" required>
-        <label for="portfolio">Portfolio:</label>
+        <label for="portfolio">Fecha fin:</label>
         <select id="portfolio" name="portfolio" required>
         </select>
-        <button type="submit">Submit</button>
+        <button type="submit">Graficar</button>
     </form>
     <div id="loading" style="display:none;">Loading...</div>
     <div id="graph"></div>

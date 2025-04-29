@@ -49,12 +49,6 @@ No se configuró un puerto particular, si no que se utilizó el por defecto de d
 
 ### Ejemplos de acceso:
 
-#### Weights
-- assets/views.py / AssetWeight / METHOD = 'GET':
-```
-http://127.0.0.1:8000/weights/?fecha_inicio=2023-02-11&fecha_fin=2023-02-13
-```
-
 #### Portfolio Values
 - assets/views.py / PortfolioValues / METHOD = 'GET':
 
@@ -62,8 +56,14 @@ http://127.0.0.1:8000/weights/?fecha_inicio=2023-02-11&fecha_fin=2023-02-13
 http://127.0.0.1:8000/portfolio/?fecha_inicio=2023-02-11&fecha_fin=2023-02-13
 ```
 
+#### Weights
+- assets/views.py / AssetWeight / METHOD = 'GET':
+```
+http://127.0.0.1:8000/weights/?fecha_inicio=2023-02-11&fecha_fin=2023-02-13
+```
+
 ### Bonus 1
-- Gráfico "Stacked Area" para "weights" de activos dentro de un portafolio en el tiempo.
+Gráfico "Lineal" para comportamiento del valor total dentro de un portafolio en el tiempo.
 ```
    http://127.0.0.1:8000/portfolio_time_series
 ``` 
@@ -72,6 +72,7 @@ Gráfico "Stacked Area" para "weights" de activos dentro de un portafolio en el 
    http://127.0.0.1:8000/asset_weights
 ``` 
 ### Bonus 2
+
 Herramienta de compra y venta de acciones. 
 Al gatillar el submit para las acciones recopiladas:
 1. Se guardará un snapshot de los valores de activos anteriores, con el fin de otorgar la posibilidad de analizar "Escenarios".
@@ -190,7 +191,7 @@ ON
 - Styling a vistas de gráficos.
 - Redirección luego de transacciones al gráfico de linea con los filtros pre definidos con la fecha de transacción dentro, para identificar la variación del valor del portfolio.
 - Refactorizar llamados a url hardcodeado con IP por defecto, por variable de ambiente.
-
+- Optimizar visualización Stacked Area para "weights".
 
 
 ## Referencias

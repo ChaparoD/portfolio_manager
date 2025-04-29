@@ -9,9 +9,11 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
+    <h1> Formulario de Compra y Venta de activos </h1>
+    <br>
     <form id="transactionForm" method="post" action="{% url 'transaction_view' %}">
         {% csrf_token %}
-        <label for="date">Date:</label>
+        <label for="date">Fecha:</label>
         <input type="date" id="date" name="date" required>
         <div id="transactions">
             <div class="transaction">
@@ -32,8 +34,9 @@
                 </select>
             </div>
         </div>
-        <button type="button" onclick="addTransaction()">Add Another Transaction</button>
-        <button type="submit">Submit</button>
+        <br>
+        <button type="button" onclick="addTransaction()">Agregar transacción</button>
+        <button type="submit">Ejecutar</button>
     </form>
 
     <script>
