@@ -48,3 +48,26 @@ class FactsDailyPrices(models.Model):
     class Meta:
         db_table = 'facts_daily_prices'
         unique_together = ('date', 'asset')
+
+class FactsDailyPricesSnapshot(models.Model):
+
+    date = models.DateField()
+    asset = models.ForeignKey(Asset, on_delete=models.CASCADE)
+    price = models.FloatField()
+    asset_value = models.FloatField()
+    snapshot_date = models.DateField()
+
+    class Meta:
+        db_table = 'facts_daily_prices_snapshot'
+
+class AssetTransactions(models.Model):
+    date = models.DateField()
+    action = models.CharField(max_length=10)
+    amount = models.IntegerField()
+    asset = models.CharField(max_length=40)
+    portfolio = models.CharField(max_length=40)
+
+    class Meta:
+        db_table = 'raw_transactions'
+
+        

@@ -1,6 +1,6 @@
 from django.urls import path, include
 from assets import views
-from .views import AssetWeight, PortfolioValues, PortfolioOptions
+from .views import AssetWeight, PortfolioValues, PortfolioOptions, AssetOptions
 from rest_framework import routers
 from .views import UserViewSet, AssetWeightViewSet
 
@@ -21,6 +21,12 @@ urlpatterns = [
 
     path("portfolio_time_series/", views.portfolio_time_series, name='portfolio_values_graph'),
     path("asset_weights/", views.asset_weights, name='asset_weights_graph' ),
-    path("portfolio_options", PortfolioOptions.as_view(), name='get_portfolio_names'),
+    path("portfolio_options/", PortfolioOptions.as_view(), name='get_portfolio_names'),
+    path("asset_options/", AssetOptions.as_view(), name='get_asset_names'),
+
+
+
+    path('transactions/', views.transaction_view, name='transaction_view'),
+
     
 ]

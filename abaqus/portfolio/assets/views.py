@@ -1,14 +1,14 @@
 from django.shortcuts import render
-from .models import FactsDailyPrices, Asset, Portfolio
+from .models import FactsDailyPrices, Asset, Portfolio 
+from .utils.helpers import take_facts_snapshot, save_transactions, update_facts_assets_values
 from django.views import View
-from django.http import HttpResponse, JsonResponse
-from django.contrib.auth.models import Group, User
+from django.http import  JsonResponse
+from django.contrib.auth.models import  User
 from rest_framework import permissions, viewsets
-from .serializers import GroupSerializer, UserSerializer, AssetWeightSerializer
+from .serializers import  UserSerializer, AssetWeightSerializer
 from datetime import datetime
 from django.db.models import Sum
-import requests
-from collections import defaultdict
+import json
 
 
 
@@ -21,6 +21,14 @@ def portfolio_time_series(request):
 
 def asset_weights(request):
     return render(request, 'assets/assetsWeights.html')
+
+"""Recieve 1 or more Transactions"""
+def transaction_view(request):
+    if request.method == 'POST':
+        transactions = json.loads(request.body).get('transactions', [])
+        update_facts_table(transactions)
+        return JsonResponse({'status': 'success', 'transactions': transactions})
+    return render(request, 'assets/transaction_form.html')
 
 
 
@@ -168,9 +176,27 @@ class PortfolioValues(View):
         return JsonResponse(response_data)
 
 
+""" Portfolio Options"""
 class PortfolioOptions(View):
     def get(self, request):
         portfolio_names = list(Portfolio.objects.all().values_list('name', flat=True))
         return JsonResponse({'portfolios': portfolio_names}, safe=False)
+    
+    #CRUD se completa aquí.
+
+class AssetOptions(View):
+    def get(self, request):
+        assets_names = list(Asset.objects.all().values_list('name', flat=True).distinct())
+        return JsonResponse({'assets': assets_names}, safe=False)
+    
+    #CRUD se completa aquí.
 
 
+def update_facts_table(transactions):
+    
+    date_str = transactions[0]["date"]
+    date = datetime.strptime(date_str, '%Y-%m-%d')
+    take_facts_snapshot(date)
+    save_transactions(date, transactions)
+    update_facts_assets_values(date, transactions)
+    

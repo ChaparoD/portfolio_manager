@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction Form</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1> Formulario de Compra y Venta de activos </h1>
+    <br>
+    <form id="transactionForm" method="post" action="{% url 'transaction_view' %}">
+        {% csrf_token %}
+        <label for="date">Fecha:</label>
+        <input type="date" id="date" name="date" required>
+        <div id="transactions">
+            <div class="transaction">
+                <label for="action">Action:</label>
+                <select name="action" required>
+                    <option value="Buy">Buy</option>
+                    <option value="Sell">Sell</option>
+                </select>
+                <label for="amount">Amount:</label>
+                <input type="number" name="amount" required>
+                <label for="portfolio">Portfolio:</label>
+                <select name="portfolio" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+                <label for="asset">Asset:</label>
+                <select name="asset" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+            </div>
+        </div>
+        <br>
+        <button type="button" onclick="addTransaction()">Agregar transacción</button>
+        <button type="submit">Ejecutar</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const portfolioUrl = 'http://127.0.0.1:8000/portfolio_options';
+            const assetUrl = 'http://127.0.0.1:8000/asset_options';
+
+            fetch(portfolioUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const portfolioOptions = data.portfolios.map(portfolio => {
+                        return `<option value="${portfolio}">${portfolio}</option>`;
+                    }).join('');
+                    document.querySelectorAll('select[name="portfolio"]').forEach(select => {
+                        select.innerHTML = portfolioOptions;
+                    });
+                })
+                .catch(error => console.error('Error fetching portfolio options:', error));
+
+            fetch(assetUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const assetOptions = data.assets.map(asset => {
+                        return `<option value="${asset}">${asset}</option>`;
+                    }).join('');
+                    document.querySelectorAll('select[name="asset"]').forEach(select => {
+                        select.innerHTML = assetOptions;
+                    });
+                })
+                .catch(error => console.error('Error fetching asset options:', error));
+        });
+
+        function addTransaction() {
+            const transactionDiv = document.createElement('div');
+            transactionDiv.className = 'transaction';
+            transactionDiv.innerHTML = `
+                <label for="action">Action:</label>
+                <select name="action" required>
+                    <option value="Buy">Buy</option>
+                    <option value="Sell">Sell</option>
+                </select>
+                <label for="amount">Amount:</label>
+                <input type="number" name="amount" required>
+                <label for="portfolio">Portfolio:</label>
+                <select name="portfolio" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+                <label for="asset">Asset:</label>
+                <select name="asset" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+            `;
+            document.getElementById('transactions').appendChild(transactionDiv);
+
+            // Populate the new select elements with options
+            const portfolioUrl = 'http://127.0.0.1:8000/portfolio_options';
+            const assetUrl = 'http://127.0.0.1:8000/asset_options';
+
+            fetch(portfolioUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const portfolioOptions = data.portfolios.map(portfolio => {
+                        return `<option value="${portfolio}">${portfolio}</option>`;
+                    }).join('');
+                    transactionDiv.querySelector('select[name="portfolio"]').innerHTML = portfolioOptions;
+                })
+                .catch(error => console.error('Error fetching portfolio options:', error));
+
+            fetch(assetUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const assetOptions = data.assets.map(asset => {
+                        return `<option value="${asset}">${asset}</option>`;
+                    }).join('');
+                    transactionDiv.querySelector('select[name="asset"]').innerHTML = assetOptions;
+                })
+                .catch(error => console.error('Error fetching asset options:', error));
+        }
+
+        document.getElementById('transactionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Show loading indicator
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.innerText = 'Loading...';
+            document.body.appendChild(loadingIndicator);
+
+            const date = document.getElementById('date').value;
+            const transactions = [];
+            document.querySelectorAll('.transaction').forEach(transactionDiv => {
+                const action = transactionDiv.querySelector('select[name="action"]').value;
+                const amount = transactionDiv.querySelector('input[name="amount"]').value;
+                const portfolio = transactionDiv.querySelector('select[name="portfolio"]').value;
+                const asset = transactionDiv.querySelector('select[name="asset"]').value;
+                transactions.push({ date, action, amount, portfolio, asset });
+            });
+
+            fetch('http://127.0.0.1:8000/transactions/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ transactions })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.href = 'http://127.0.0.1:8000/portfolio_time_series/';
+                } else {
+                    alert('Submission failed');
+                }
+            })
+            .catch(error => {
+                console.error('Error submitting transactions:', error);
+                alert('An error occurred');
+            })
+            .finally(() => {
+                // Remove loading indicator
+                document.body.removeChild(loadingIndicator);
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+{% endblock page_content %}

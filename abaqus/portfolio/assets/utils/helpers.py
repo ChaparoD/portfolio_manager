@@ -1,5 +1,7 @@
 from django.db import transaction
-from ..models import Portfolio, Asset, RawDailyPrices, FactsDailyPrices
+from django.db.models import F
+from ..models import Portfolio, Asset, RawDailyPrices, FactsDailyPrices,\
+                     FactsDailyPricesSnapshot, AssetTransactions
 import polars as pl
 import os, datetime
 
@@ -74,11 +76,12 @@ def load_raw_prices():
     
 def transform_prices():
     """
-    Dimensional fact model will have, as many duplicated raw rows
-    exists for each portfolio instance.
-    So, for every Asset Price, if the Asset has presence in 3  Portfolios, then 3 rows will 
-    be added, with their corresponding weight.
-    NOTE : SQL precise views of could be constructed to ease the access for non SQL experts.
+    Modelo dimensional de hechos:
+    - Se agregará cada registro de Raw (tiempo/activo/precio) por cuantas "Instancias" 
+        encuentre de ese activo particular en los portfolios.
+        Ej: Si todas las acciones están en ambos portafolios, se Facts tiene el doble de
+          registros que Raw. 
+    NOTE : Se pueden entregar vistas de consumo del modelo para usuarios no expertos en SQL.
     """
     print("Conforming facts ... ... ..")
     raw_prices = RawDailyPrices.objects.all()
@@ -95,5 +98,77 @@ def transform_prices():
         with transaction.atomic():
             FactsDailyPrices.objects.bulk_create(bulk_facts)
     except Exception as e:
-        print(f'RaisedException during asset prices bulk operation :  {e} ')
+        print(f'RaisedException during asset prices facts bulk operation :  {e} ')
     
+
+def take_facts_snapshot(date):
+    print("Snapshoting facts ... ... ..")
+    snapshot = FactsDailyPrices.objects.all()
+    bulk_facts_snapshot = []
+    for facts in snapshot.iterator():
+        bulk_facts_snapshot.append(FactsDailyPricesSnapshot(
+                            date= facts.date,
+                            asset= facts.asset,
+                            price= facts.price,
+                            asset_value = facts.asset_value,
+                            snapshot_date= date))
+    try:
+        with transaction.atomic():
+            FactsDailyPricesSnapshot.objects.bulk_create(bulk_facts_snapshot)
+    except Exception as e:
+        print(f'RaisedException during snapshot fact asset prices bulk operation :  {e} ')
+    
+def save_transactions(date, transactions):
+    print("Saving transactions ... ... ..")
+    bulk_transactions = []
+    for data in transactions:
+        bulk_transactions.append(AssetTransactions(
+                            date = date,
+                            action = data['action'],
+                            amount = data['amount'],
+                            asset = data['asset'],
+                            portfolio = data['portfolio']
+                            ))
+    try:
+        with transaction.atomic():
+            AssetTransactions.objects.bulk_create(bulk_transactions)
+    except Exception as e:
+        print(f'RaisedException during transactions bulk operation :  {e} ')
+    
+
+def update_facts_assets_values(min_date, transactions):
+    print("Updating Facts ... ... ..")
+    facts_domain = FactsDailyPrices.objects.filter(date__gte=min_date)
+    if not facts_domain:
+        print("No facts to update")
+        return
+    else:
+        assets = Asset.objects.all().select_related('portfolio')
+        print(transactions)
+        for mov in transactions:
+            """
+            Para cada transacción, si existe el activo relacionado, calcula la nueva cantidad, valor
+            asociado
+            obs:
+            - Falta cubrir casos de si el activo no existe para el portafolio.
+            - No hay validaciones de venta por sobre lo disponible. Solo se lleva cantidad y valor a 0
+            - No existen agrupaciones bajo transacciones sobre el mismo activo.
+            """
+            asset = assets.get(name = mov["asset"], portfolio__name = mov["portfolio"] )
+            if asset:
+                asset_transaction_price = facts_domain.filter(date=min_date, asset = asset).values('price')
+                if asset_transaction_price:
+                    if mov["action"] == "Sell":
+                        asset.quantity = round(max(0, asset.quantity - float(mov["amount"]) / 
+                                            asset_transaction_price[0]['price']), 3)
+                    else:
+                        asset.quantity += round(float(mov["amount"])/asset_transaction_price[0]['price'], 3) 
+                    
+                    asset.save()
+                    facts_domain.filter(asset=asset).update(asset_value = 
+                                                         F('price') * asset.quantity) 
+                    
+
+
+
+        

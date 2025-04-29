@@ -9,12 +9,14 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
+    <h1> Línea de tiempo de valor de Portafolios</h1>
+    <br>
     <form id="dateForm">
-        <label for="startDate">Start Date:</label>
+        <label for="startDate">Fecha inicio:</label>
         <input type="date" id="startDate" name="startDate" required>
-        <label for="endDate">End Date:</label>
+        <label for="endDate">Fecha fin:</label>
         <input type="date" id="endDate" name="endDate" required>
-        <button type="submit">Submit</button>
+        <button type="submit">Graficar</button>
     </form>
     <div id="graph"></div>
     <script>
