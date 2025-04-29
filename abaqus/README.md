@@ -19,19 +19,12 @@
 
 
 #### Levantar aplicación. 
-3.  (venv) $ Entrar al proyecto Django : ```cd portfolio```
-4.  (venv) $ Instalar depencias del proyecto: ```pip install -r requirements.txt```
-5.  (venv) $ Construir BBDD y correr migraciones: ```python manage.py migrate```
-6.  (venv) $ Levantar servidor: ```python manage.py runserver```
-7.  (venv) $ Poblar BBDD: ```python manage.py run_etl```
+3.  Entrar al proyecto Django : $ ```cd portfolio```
+4.  Instalar depencias del proyecto: $ ```pip install -r requirements.txt```
+5.  Construir BBDD y correr migraciones: $ ```python manage.py migrate```
+6.  Levantar servidor: $ ```python manage.py runserver```
+7.  Poblar BBDD: $ ```python manage.py run_etl```
 
-
-#### Credenciales de super usuario.
-```
-user : daniel
-email : daniel@abaqus.cl
-pwd : work_hard
-```
 
 ## Direcciones
 Se habilita Django rest framework para facilitar la navegación de la información disponible directamente en el modelo de datos propuesto. 
@@ -40,6 +33,9 @@ No se configuró un puerto particular, si no que se utilizó el por defecto de d
 -   "http://127.0.0.1:8000/" = Django rest Api Root framework.
 -   "http://127.0.0.1:8000/facts/" = Facts serializer view.
 -   "http://127.0.0.1:8000/admin/" = Django Admin.
+
+Para su acceso, se debe iniciar sesión con un super usuario.
+8.  Crear super usuario $ ```python manage.py createsuperuser```
 
 
 ### Ejemplos de acceso:
