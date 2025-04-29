@@ -1,14 +1,12 @@
 from django.shortcuts import render
 from .models import FactsDailyPrices, Asset, Portfolio
 from django.views import View
-from django.http import HttpResponse, JsonResponse
+from django.http import  JsonResponse
 from django.contrib.auth.models import Group, User
 from rest_framework import permissions, viewsets
-from .serializers import GroupSerializer, UserSerializer, AssetWeightSerializer
+from .serializers import  UserSerializer, AssetWeightSerializer
 from datetime import datetime
 from django.db.models import Sum
-import requests
-from collections import defaultdict
 
 
 
@@ -22,6 +20,13 @@ def portfolio_time_series(request):
 def asset_weights(request):
     return render(request, 'assets/assetsWeights.html')
 
+"""Recieve 1 or more Transactions"""
+def transaction_view(request):
+    if request.method == 'POST':
+        transactions = request.POST.getlist('transactions')
+        print("llego post")
+        return JsonResponse({'status': 'success', 'transactions': transactions})
+    return render(request, 'assets/transaction_form.html')
 
 
 """ Helpers"""
@@ -168,9 +173,19 @@ class PortfolioValues(View):
         return JsonResponse(response_data)
 
 
+""" Portfolio Options"""
 class PortfolioOptions(View):
     def get(self, request):
         portfolio_names = list(Portfolio.objects.all().values_list('name', flat=True))
         return JsonResponse({'portfolios': portfolio_names}, safe=False)
+    
+    #CRUD se completa aquí.
+
+class AssetOptions(View):
+    def get(self, request):
+        assets_names = list(Asset.objects.all().values_list('name', flat=True).distinct())
+        return JsonResponse({'assets': assets_names}, safe=False)
+    
+    #CRUD se completa aquí.
 
 

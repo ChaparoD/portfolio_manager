@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+<!-- templates/transaction_form.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Transaction Form</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <form id="transactionForm" method="post" action="{% url 'transaction_view' %}">
+        {% csrf_token %}
+        <div id="transactions">
+            <div class="transaction">
+                <label for="date">Date:</label>
+                <input type="date" name="date" required>
+                <label for="action">Action:</label>
+                <select name="action" required>
+                    <option value="Buy">Buy</option>
+                    <option value="Sell">Sell</option>
+                </select>
+                <label for="amount">Amount:</label>
+                <input type="number" name="amount" required>
+                <label for="portfolio">Portfolio:</label>
+                <select name="portfolio" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+                <label for="asset">Asset:</label>
+                <select name="asset" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+            </div>
+        </div>
+        <button type="button" onclick="addTransaction()">Add Another Transaction</button>
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const portfolioUrl = 'http://127.0.0.1:8000/portfolio_options';
+            const assetUrl = 'http://127.0.0.1:8000/asset_options';
+
+            fetch(portfolioUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const portfolioSelect = document.querySelector('select[name="portfolio"]');
+                    data.portfolios.forEach(portfolio => {
+                        const option = document.createElement('option');
+                        option.value = portfolio;
+                        option.textContent = portfolio;
+                        portfolioSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching portfolio options:', error));
+
+            fetch(assetUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const assetSelect = document.querySelector('select[name="asset"]');
+                    data.assets.forEach(asset => {
+                        const option = document.createElement('option');
+                        option.value = asset;
+                        option.textContent = asset;
+                        assetSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching asset options:', error));
+        });
+
+        function addTransaction() {
+            const transactionDiv = document.createElement('div');
+            transactionDiv.className = 'transaction';
+            transactionDiv.innerHTML = `
+                <label for="date">Date:</label>
+                <input type="date" name="date" required>
+                <label for="action">Action:</label>
+                <select name="action" required>
+                    <option value="Buy">Buy</option>
+                    <option value="Sell">Sell</option>
+                </select>
+                <label for="amount">Amount:</label>
+                <input type="number" name="amount" required>
+                <label for="portfolio">Portfolio:</label>
+                <select name="portfolio" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+                <label for="asset">Asset:</label>
+                <select name="asset" required>
+                    <!-- Options will be dynamically populated -->
+                </select>
+            `;
+            document.getElementById('transactions').appendChild(transactionDiv);
+        }
+
+        document.getElementById('transactionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const transactions = [];
+            document.querySelectorAll('.transaction').forEach(transactionDiv => {
+                const date = transactionDiv.querySelector('input[name="date"]').value;
+                const action = transactionDiv.querySelector('select[name="action"]').value;
+                const amount = transactionDiv.querySelector('input[name="amount"]').value;
+                const portfolio = transactionDiv.querySelector('select[name="portfolio"]').value;
+                const asset = transactionDiv.querySelector('select[name="asset"]').value;
+                transactions.push({ date, action, amount, portfolio, asset });
+            });
+
+            fetch('http://127.0.0.1:8000/transactions/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: JSON.stringify({ transactions })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Transaction response:', data);
+            })
+            .catch(error => console.error('Error submitting transactions:', error));
+        });
+    </script>
+</body>
+</html>
+
+{% endblock page_content %}
